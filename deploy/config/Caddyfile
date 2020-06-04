@@ -1,0 +1,6 @@
+:{$PORT} {
+	proxy / {$DOCKER_GWBRIDGE_IP}:{$DOCKER_GWBRIDGE_PORT} {
+		transparent
+	}
+	tls off
+}

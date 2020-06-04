@@ -1,0 +1,44 @@
+version: '3.5'
+
+services:
+  dockerd-exporter:
+    image: ${IMAGE_NAME:-productionwentdown/caddy}:${IMAGE_TAG:-1}
+    environment:
+      PORT:
+      DOCKER_GWBRIDGE_IP:
+      DOCKER_GWBRIDGE_PORT:
+    networks:
+      metric-net:
+    volumes:
+      - work-vol:/etc/.caddy
+    configs:
+      - source: caddyfile-config
+        target: /etc/Caddyfile
+    deploy:
+      mode: global
+      restart_policy:
+        delay: ${RESTART_DELAY:-10s}
+      update_config:
+        delay: ${UPDATE_DELAY:-30s}
+      resources:
+        limits:
+          cpus: '${RESOURCES_LIMITS_CPUS:-0.1}'
+          memory: ${RESOURCES_LIMITS_MEMORY:-32M}
+        reservations:
+          cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-8M}
+
+networks:
+  metric-net:
+    name: ${METRIC_NET_NAME:-metric-net}
+    driver: ${METRIC_NET_DRIVER:-overlay}
+    external: true
+
+volumes:
+  work-vol:
+    name: ${WORK_VOL_NAME:-dockerd-exporter-work-vol}
+
+configs:
+  caddyfile-config:
+    name: ${CADDYFILE_CONFIG_NAME:-dockerd-exporter-caddyfile}
+    file: ./config/Caddyfile
