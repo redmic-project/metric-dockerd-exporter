@@ -1,6 +1,14 @@
-:{$PORT} {
-	proxy / {$DOCKER_GWBRIDGE_IP}:{$DOCKER_GWBRIDGE_PORT} {
-		transparent
+{
+	admin off
+	auto_https off
+	log {
+		format console {
+			time_format iso8601
+		}
 	}
-	tls off
+}
+
+:{$CADDY_PORT} {
+	reverse_proxy {$DOCKER_GWBRIDGE_IP}:{$DOCKER_GWBRIDGE_PORT}
+	respond /health "OK" 200
 }

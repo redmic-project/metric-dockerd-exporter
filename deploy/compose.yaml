@@ -1,42 +1,40 @@
-version: '3.5'
-
 services:
   dockerd-exporter:
-    image: ${IMAGE_NAME:-productionwentdown/caddy}:${IMAGE_TAG:-1}
+    image: ${IMAGE_NAME:-caddy}:${IMAGE_TAG:-latest}
     environment:
-      PORT:
+      CADDY_PORT:
       DOCKER_GWBRIDGE_IP:
       DOCKER_GWBRIDGE_PORT:
     networks:
       metric-net:
-    volumes:
-      - work-vol:/etc/.caddy
     configs:
       - source: caddyfile-config
-        target: /etc/Caddyfile
+        target: /etc/caddy/Caddyfile
+    healthcheck:
+      test: wget --spider -q http://localhost:${CADDY_PORT}/health
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-5s}
+      retries: ${HEALTHCHECK_RETRIES:-10}
+      start_period: ${HEALTHCHECK_START_PERIOD:-30s}
     deploy:
       mode: global
       restart_policy:
-        delay: ${RESTART_DELAY:-10s}
+        delay: ${RESTART_DELAY:-5s}
       update_config:
-        delay: ${UPDATE_DELAY:-30s}
+        delay: ${UPDATE_DELAY:-0s}
       resources:
         limits:
           cpus: '${RESOURCES_LIMITS_CPUS:-0.1}'
           memory: ${RESOURCES_LIMITS_MEMORY:-32M}
         reservations:
           cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
-          memory: ${RESOURCES_RESERVATIONS_MEMORY:-8M}
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-16M}
 
 networks:
   metric-net:
     name: ${METRIC_NET_NAME:-metric-net}
     driver: ${METRIC_NET_DRIVER:-overlay}
     external: true
-
-volumes:
-  work-vol:
-    name: ${WORK_VOL_NAME:-dockerd-exporter-work-vol}
 
 configs:
   caddyfile-config:
