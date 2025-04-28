@@ -11,7 +11,7 @@ services:
       - source: caddyfile-config
         target: /etc/caddy/Caddyfile
     healthcheck:
-      test: wget --spider -q http://localhost:${CADDY_PORT}/health
+      test: wget --spider -q http://127.0.0.1:${CADDY_PORT}/health
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: ${HEALTHCHECK_TIMEOUT:-5s}
       retries: ${HEALTHCHECK_RETRIES:-10}
